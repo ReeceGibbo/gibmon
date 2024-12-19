@@ -30,5 +30,5 @@ fn main() {
     // API Integration
     // Soundcloud
     // Spotify
-    // Github
+    // GitHub
 }
