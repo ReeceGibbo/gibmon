@@ -180,4 +180,44 @@ impl Device {
         }
         Ok(())
     }
+
+    pub fn display_picture(
+        &mut self,
+        image_data: Vec<u8>,
+        x: u16,
+        y: u16,
+        width: u16,
+        height: u16,
+    ) -> Result<(), DeviceError> {
+        let display_packet = create_display_image_packet(x, y, width, height);
+
+        self.serial_connection
+            .write_all(&display_packet)
+            .map_err(DeviceError::IoError)?;
+
+        let total_size = image_data.len();
+        let rows_per_chunk = 2;
+        let chunk_size = 480 * 2 * rows_per_chunk;
+        let mut start = 0;
+
+        while start < total_size {
+            let end = (start + chunk_size).min(total_size);
+            let chunk = &image_data[start..end];
+
+            self.serial_connection
+                .write_all(&chunk)
+                .map_err(DeviceError::IoError)?;
+
+            start = end;
+        }
+        Ok(())
+    }
+
+    pub fn get_width(&self) -> u16 {
+        self.width
+    }
+
+    pub fn get_height(&self) -> u16 {
+        self.height
+    }
 }
